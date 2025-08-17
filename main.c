@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/17 14:24:40 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/17 17:51:35 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/17 18:05:58 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,26 +51,45 @@ void init_map(t_Map *map)
     }
     
 }
+int srender(void *param)
+{
+    t_Map *player = (t_Map *)param;
+
+    // Clear the window (if needed)
+    mlx_clear_window(player->mlx, player->win);
+
+    // Draw something, e.g., a pixel at player's position
+    int px = (int)(player->x * 64); // assuming each tile is 64 pixels
+    int py = (int)(player->y * 64);
+    mlx_pixel_put(player->mlx, player->win, px, py, 0xFFFFFF); // white pixel
+
+    return (0);
+}
+
 
 int main(int ac, char **av)
 {
     t_Map *map;
-    t_Map player; // Declare a variable to store player's info
+    t_Map player;
 
     (void)ac;
     map = fill_map(av[1]);
     init_map(map);
     set_color(map, map->x, map->y);
 
-    // Find the player's starting position and orientation
     find_player(map, &player);
 
-    // Now, you can use 'player' as needed, e.g., for rendering or movement
-    printf("Player position: (%d, %d)\n", player.x, player.y);
-    printf("Player direction: (%d, %d)\n", player.dir_x, player.dir_y);
+    // Create window if not already created
+    map->mlx = mlx_init();
+    map->win = mlx_new_window(map->mlx, 800, 600, "My Game");
 
+    // Setup rendering loop
+    mlx_loop_hook(map->mlx, (void *)srender, &player);
+
+    // Event hooks
     mlx_hook(map->win, 17, 0, close_window, map);
-    mlx_hook(map->win, 2, 1L<<0, key_press, map);  // Pass 'map' as you do
+    mlx_hook(map->win, 2, 1L<<0, key_press, map);
+
     mlx_loop(map->mlx);
 
     return (0);
