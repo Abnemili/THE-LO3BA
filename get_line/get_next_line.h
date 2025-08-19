@@ -6,11 +6,9 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 12:04:41 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/19 12:04:42 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/19 12:14:06 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
