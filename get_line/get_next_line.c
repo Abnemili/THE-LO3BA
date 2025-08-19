@@ -3,12 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nahilal <nahilal@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/05 16:46:35 by nahilal           #+#    #+#             */
-/*   Updated: 2024/12/21 17:25:48 by nahilal          ###   ########.fr       */
+/*   Created: 2025/08/19 12:04:33 by abnemili          #+#    #+#             */
+/*   Updated: 2025/08/19 12:04:34 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #include "get_next_line.h"
 

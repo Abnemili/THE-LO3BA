@@ -3,12 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nahilal <nahilal@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/05 16:48:13 by nahilal           #+#    #+#             */
-/*   Updated: 2024/12/21 15:34:46 by nahilal          ###   ########.fr       */
+/*   Created: 2025/08/19 12:04:41 by abnemili          #+#    #+#             */
+/*   Updated: 2025/08/19 12:04:42 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H

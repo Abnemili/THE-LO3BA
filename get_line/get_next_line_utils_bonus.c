@@ -3,12 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils_bonus.c                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nahilal <nahilal@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/17 13:39:11 by nahilal           #+#    #+#             */
-/*   Updated: 2024/12/17 13:39:11 by nahilal          ###   ########.fr       */
+/*   Created: 2025/08/19 12:04:21 by abnemili          #+#    #+#             */
+/*   Updated: 2025/08/19 12:04:21 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #include "get_next_line_bonus.h"
 
