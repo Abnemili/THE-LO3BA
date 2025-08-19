@@ -27,8 +27,12 @@ typedef struct s_map
 
 /* Colors */
 #define PLAYER_COLOR 0x00FF00    /* Green */
-#define COLOR_WALL   0xFFFFFF    /* White */
+#define COLOR_WALL   0X8B0000    /* White */
 #define COLOR_FREE   0x000000    /* Black */
+
+#define MOVE_SPEED 8  // Pixels per keypress
+#define PLAYER_SIZE 8 // Size of player square
+#define PLAYER_OFFSET 12 // Offset from tile corner
 
 /* Key codes */
 #define KEY_ESC 65307
@@ -58,6 +62,7 @@ void    set_color(t_map *map);
 int     handle_key_input(int keycode, t_map *map);
 void    draw_player(t_map *map);
 int     handle_close(t_map *map);
+void draw_square(t_map *map, int x, int y, int color);
 
 //the libft functions
 void	ft_putnbr(int n);
