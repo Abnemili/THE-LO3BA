@@ -9,6 +9,7 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
+#include <math.h>
 
 typedef struct s_player{
     double player_x;            // x and y are the player position cordinate 

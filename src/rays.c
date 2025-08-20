@@ -15,7 +15,7 @@
 #define SCRENN_HEIGHT 600
 #define FOV 60.0
 #define PI 3.14159265359
-#define TILE_SIZE 32
+
 
 // convert degree to radian
 double deg_to_rad(double degree)
@@ -36,5 +36,48 @@ int ft_bounds(t_map *map, int   width, int height)
 
 double cast_ray(t_map *map, double ray_angle)
 {
+    double  ray_x;
+    double  ray_y;
+    double  rad_angle;
+
+    ray_x = map->player->player_x; // the player position x
+    ray_y = map->player->player_y; // the player position y
+    rad_angle = deg_to_rad(ray_angle);
+
+    double  ray_dx = cos(rad_angle);
+    double  ray_dy = sin(rad_angle);
+
+
+    double  step_size = 0.1;
+
+    while (1)
+    {
+        // move ray forward 
+        ray_x = ray_dx * step_size;
+        ray_y = ray_dy * step_size;
+
+        int map_x = (int)(ray_x / TILE);
+        int map_y = (int)(ray_y / TILE);
+
+
+        /// getting the lenght of ray casted form the player to the hitting wall
+        if (ft_bounds(map, map_x, map_y))
+        {
+            double distance = sqrt(
+                (ray_x - map->player->player_x) * (ray_x - map->player->player_x)
+                + (ray_y - map->player->player_y) *(ray_y - map->player->player_y)
+            );
+            return (distance);
+        }
     
+
+        // safly cheching the ray lenght doesnt goo to fare 
+        if (sqrt(
+                (ray_x - map->player->player_x) * (ray_x - map->player->player_x)
+                + (ray_y - map->player->player_y) *(ray_y - map->player->player_y)
+            ) > 1000)
+            {
+                return 1000;
+            }
+    }
 }
