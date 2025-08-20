@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 12:03:28 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/19 17:41:09 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/20 11:24:18 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@ void draw_player(t_map *map)
         while (PLAYER_SIZE > j)
         {
             mlx_pixel_put(map->mlx, map->win, 
-                map->player_x + PLAYER_OFFSET + i,
-                map->player_y + PLAYER_OFFSET + j, 
+                map->player->player_x  + PLAYER_OFFSET + i,
+                map->player->player_y + PLAYER_OFFSET + j, 
                 PLAYER_COLOR);
             j++;
         }
@@ -65,10 +65,10 @@ void set_color(t_map *map)
     int color;
 
     y = 0;
-    while (map->y > y)
+    while (map->height > y)
     {
         x = 0;
-        while (map->x > x)
+        while (map->width > x)
         {
             if(map->map[y][x] == 48)
                 color = COLOR_FREE;
@@ -87,29 +87,31 @@ void set_color(t_map *map)
 // init the player first position in the map
 void init_player_position(t_map *map)
 {
-    int     x;
-    int     y;
+    int x;
+    int y;
 
     y = 0;
-    while (map->y > y)
+   
+    while (map->height > y)
     {
         x = 0;
-        while (map->x > x)
+        while (map->width > x)
         {
-            if (map->map[y][x] == 48)
+            if (map->map[y][x] == '0')
             {
-                map->player_x = x * TILE + 4;
-                map->player_y = y * TILE + 4;
-                return ;
+                map->player->player_x = x * TILE + 4;
+                map->player->player_y = y * TILE + 4;
+                return;
             }
             x++;
         }
         y++;
     }
-
-    map->player_x = 4;
-    map->player_y = 4;
+    map->player->player_x = 4;
+    map->player->player_y = 4;
 }
+
+
 void mlx_connection(t_map *map)
 {
     map->mlx = mlx_init();
@@ -117,8 +119,8 @@ void mlx_connection(t_map *map)
     {
         exit(1);
     }
-    map->win = mlx_new_window(map->mlx, map->x * TILE,
-        map->y * TILE, "THE_LO3BA");
+    map->win = mlx_new_window(map->mlx, map->width * TILE,
+        map->height * TILE, "THE_LO3BA");
     if (!map->win)
     {
         mlx_destroy_display(map->mlx);

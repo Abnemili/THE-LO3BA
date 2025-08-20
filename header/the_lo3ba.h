@@ -10,16 +10,22 @@
 # include <stdlib.h>
 # include <unistd.h>
 
-typedef struct s_map
-{
+typedef struct s_player{
+    double player_x;            // x and y are the player position cordinate 
+    double player_y;
+    double angle;           //player view direction in degree
+}t_player;
+
+
+typedef struct s_map{
     void    *mlx;
     void    *win;
     char    **map;
-    int     player_x;
-    int     player_y;
-    int     x;
-    int     y;
+    int     width;
+    int     height;
+    t_player *player;
 }t_map;
+
 
 
 /* Game settings */

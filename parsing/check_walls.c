@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 10:05:15 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/18 11:53:11 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/20 10:59:47 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@ static void	middle_rows(t_map *map)
 	int	i;
 
 	i = 1;
-	while (i < map->y - 2)
+	while (i < map->height - 2)
 	{
-		if (map->map[i][0] != '1' || map->map[i][map->x - 1] != '1')
+		if (map->map[i][0] != '1' || map->map[i][map->width - 1] != '1')
 		{
 			puts("Error\nthe map not rounded by walls\n");
 			
@@ -34,7 +34,7 @@ static void	first_row(t_map *map)
 	int	i;
 
 	i = 0;
-	while (i < map->x)
+	while (i < map->width)
 	{
 		if (map->map[0][i] != '1')
 		{
@@ -51,9 +51,9 @@ static void	last_row(t_map *map)
 	int	i;
 
 	i = 0;
-	while (i < map->x)
+	while (i < map->width)
 	{
-		if (map->map[map->y - 1][i] != '1')
+		if (map->map[map->height - 1][i] != '1')
 		{
 			puts("Error\nthe map not rounded by walls\n");
 			

@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 09:33:17 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/18 11:53:03 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/20 11:14:52 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ t_map	*check_map(char *av)
 
 	check_ext(av);      // done -> checking for argument and ext map .cub
 	map = fill_map(av);  // done -> filling the map with content from the map fil into our 2d arr
-	if (map->x > 1920 || map->y > 1080) // settign limit for the resoulition
+	if (map->width > 1920 || map->height > 1080) // settign limit for the resoulition
 	{
 		puts("Error\nthe map is too big!!\n"); //forbiden use
 		exit(1);

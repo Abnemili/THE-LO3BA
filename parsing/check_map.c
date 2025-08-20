@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 09:58:38 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/18 11:53:13 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/20 10:58:49 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,10 @@ void	check_shape(t_map *map)
 
 	i = 0;
 	len = 0;
-	while (i < map->y)
+	while (i < map->height)
 	{
-		if ((ft_strlen1(map->map[i]) != map->x || ft_strlen1(map->map[map->y
-						- 1]) != map->x))
+		if ((ft_strlen1(map->map[i]) != map->width || ft_strlen1(map->map[map->height
+						- 1]) != map->width))
 		{
 			puts("Error\nthe map not rectangular\n");
 			exit(1);

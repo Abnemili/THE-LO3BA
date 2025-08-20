@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 09:44:32 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/18 11:52:54 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/20 11:23:35 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ static int	map_height(char *av)
 	return (h);
 }
 
-//allocating memory for the giving map file based on the map height
 static t_map	*init_map_height(int h)
 {
 	t_map	*map;
@@ -41,10 +40,17 @@ static t_map	*init_map_height(int h)
 	map = malloc(sizeof(t_map));
 	if (!map)
 		exit(1);
-	map->y = h;
+	map->height = h;
 	map->map = malloc(sizeof(char *) * (h + 1));
 	if (!map->map)
 		free(map);
+	map->player = malloc(sizeof(t_player));
+    if (!map->player)
+    {
+        free(map->player);
+        free(map);
+        exit(1);
+    }
 	return (map);
 }
 
@@ -59,7 +65,7 @@ static void	fill_map_content(t_map *map, char *av)
 	if (fd == -1)
 		(puts("Error\nFaild to open map file \n"), exit(1)); // also forbiden use 
 	row = 0;
-	while (row < map->y)
+	while (row < map->height)
 	{
 		line = get_next_line(fd);
 		map->map[row++] = line;
@@ -85,6 +91,6 @@ t_map	*fill_map(char *av)
 	}
 	map = init_map_height(h);
 	fill_map_content(map, av);
-	map->x = ft_strlen1(map->map[0]);
+	map->width = ft_strlen1(map->map[0]);
 	return (map);
 }
