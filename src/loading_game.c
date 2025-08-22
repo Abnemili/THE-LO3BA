@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 12:03:28 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/22 09:03:19 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/22 10:07:01 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void render_scene(t_map *map)
 {
     clear_image(map);            // Fill background
     set_color(map);              // Draw static map (walls & free spaces)
-    draw_player(map);            // Draw dynamic player
+    draw_player(map);  
     mlx_put_image_to_window(map->mlx, map->win, map->img, 0, 0); // Show buffer
 }
 
@@ -64,8 +64,8 @@ void draw_player(t_map *map)
         while (PLAYER_SIZE > j)
         {
             mlx_pixel_put(map->mlx, map->win, 
-                map->player->player_x  + PLAYER_OFFSET + i,
-                map->player->player_y + PLAYER_OFFSET + j, 
+                map->player.player_x  + PLAYER_OFFSET + i,
+                map->player.player_y + PLAYER_OFFSET + j, 
                 PLAYER_COLOR);
             j++;
         }
@@ -137,16 +137,17 @@ void init_player_position(t_map *map)
         {
             if (map->map[y][x] == '0')
             {
-                map->player->player_x = x * TILE + 4;
-                map->player->player_y = y * TILE + 4;
+                map->player.player_x = x * TILE + 4;
+                map->player.player_y = y * TILE + 4;
                 return;
             }
             x++;
         }
         y++;
     }
-    map->player->player_x = 4;
-    map->player->player_y = 4;
+    map->player.player_x = 4;
+    map->player.player_y = 4;
+    map->player.angle = 0.0;
 }
 
 
@@ -175,8 +176,7 @@ void load_game(t_map *map)
     // Initial render
     set_color(map);  // done
     draw_player(map); // done
-  
-    draw_ray(map);
+    // draw_ray(map);
 
 
     // Set up event hooks

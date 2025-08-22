@@ -29,12 +29,14 @@ typedef struct s_map {
     char    **map;
     int     width;
     int     height;
-    t_player *player;
+    t_player player;
 }t_map;
 
 
 /* Game settings */
 #define TILE 32
+#define DEG_TO_RAD(angleDegrees) ((angleDegrees) * 3.14159265358979323846 / 180.0)
+
 
 /* Colors */
 #define PLAYER_COLOR 0x00FF00    /* Green */
@@ -84,5 +86,7 @@ void	ft_putnbr(int n);
 
 // the ray casting concepty and drwinfg rays 
 void draw_ray(t_map *game);
+
+void draw_pixel(t_map *game, int x, int y, int color);
     
 #endif

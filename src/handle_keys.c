@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 12:03:40 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/20 11:23:14 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/22 10:23:43 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,8 @@ void clear_player_area(t_map *map)
     {
         for (x = -1; x <= 1; x++)
         {
-            int tile_x = (map->player->player_x + PLAYER_OFFSET + PLAYER_SIZE/2) / TILE + x;
-            int tile_y = (map->player->player_y + PLAYER_OFFSET + PLAYER_SIZE/2) / TILE + y;
+            int tile_x = (map->player.player_x + PLAYER_OFFSET + PLAYER_SIZE/2) / TILE + x;
+            int tile_y = (map->player.player_y + PLAYER_OFFSET + PLAYER_SIZE/2) / TILE + y;
             
             if (tile_x >= 0 && tile_x < map->width && tile_y >= 0 && tile_y < map->height)
             {//d
@@ -59,7 +59,6 @@ void clear_player_area(t_map *map)
         }
     }
 }
-
 int handle_key_input(int keycode, t_map *map)
 {
     int new_x, new_y;
@@ -67,9 +66,37 @@ int handle_key_input(int keycode, t_map *map)
     if (keycode == KEY_ESC)
         return (handle_close(map));
     
-    // Calculate new position
-    new_x = map->player->player_x;
-    new_y = map->player->player_y;
+    // Handle rotation first
+    if (keycode == 65361) // Left arrow key
+    {
+        map->player.angle -= 5.0;
+        if (map->player.angle < 0)
+            map->player.angle += 360;
+        
+        // Clear and redraw for rotation
+        mlx_clear_window(map->mlx, map->win);
+        set_color(map);
+        draw_player(map);
+        draw_ray(map);  // Add this line
+        return (0);
+    }
+    else if (keycode == 65363) // Right arrow key
+    {
+        map->player.angle += 5.0;
+        if (map->player.angle >= 360)
+            map->player.angle -= 360;
+        
+        // Clear and redraw for rotation  
+        mlx_clear_window(map->mlx, map->win);
+        set_color(map);
+        draw_player(map);
+        draw_ray(map);  // Add this line
+        return (0);
+    }
+    
+    // Calculate new position for movement
+    new_x = map->player.player_x;
+    new_y = map->player.player_y;
     
     if (keycode == KEY_W) // W - Up
         new_y -= MOVE_SPEED;
@@ -80,20 +107,22 @@ int handle_key_input(int keycode, t_map *map)
     else if (keycode == KEY_D) // D - Right
         new_x += MOVE_SPEED;
     else
-        return (0); // Unknown key, do nothing
+        return (0);
     
     // Check if move is valid
     if (is_valid_move(map, new_x, new_y))
     {
-        // Clear previous player position
-        clear_player_area(map);
+        // Clear and redraw for movement
+        mlx_clear_window(map->mlx, map->win);
+        set_color(map);
         
         // Update position
-        map->player->player_x = new_x;
-        map->player->player_y = new_y;
+        map->player.player_x = new_x;
+        map->player.player_y = new_y;
         
-        // Draw player at new position
+        // Draw player and ray
         draw_player(map);
+        draw_ray(map);  // This should already be here
     }
     
     return (0);

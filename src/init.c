@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 09:44:32 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/20 11:23:35 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/22 09:13:40 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,13 +44,13 @@ static t_map	*init_map_height(int h)
 	map->map = malloc(sizeof(char *) * (h + 1));
 	if (!map->map)
 		free(map);
-	map->player = malloc(sizeof(t_player));
-    if (!map->player)
-    {
-        free(map->player);
-        free(map);
-        exit(1);
-    }
+	// map->player = malloc(sizeof(t_player));
+    // if (!map->player)
+    // {
+    //     free(map->player);
+    //     free(map);
+    //     exit(1);
+    // }
 	return (map);
 }
 
