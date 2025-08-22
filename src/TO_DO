@@ -1,0 +1,28 @@
+TO DO IN THIS PROJECT :
+
+1. **Implement Raycasting:**
+   - Cast rays from the player's position, one for each vertical stripe on the screen.
+   - Calculate the distance to the nearest wall for each ray.
+   - Use these distances to determine the height of the wall slice to draw, creating a pseudo-3D effect.
+
+2. **Calculate Wall Heights:**
+   - Use the distance from the raycast to determine how tall to draw each wall slice.
+   - Correct for fish-eye distortion by adjusting the distance based on the angle between the ray and the player's view direction.
+
+3. **Draw the Walls:**
+   - For each ray, draw a vertical line with the height based on the calculated distance.
+   - Apply textures or colors to walls based on their orientation or type.
+
+4. **Implement Player Movement & Controls:**
+   - Allow the player to move forward, backward, and turn left/right.
+   - Update the player's position and direction accordingly.
+
+5. **Add Floor and Ceiling:**
+   - Render the floor and ceiling to complete the scene, often by filling regions below and above the walls.
+
+6. **Optimize & Add Effects (Optional):**
+   - Add shading for depth.
+   - Implement sprites and objects.
+   - Handle input for a smoother experience.
+
+Would you like me to help you with a specific part of this process, like writing the raycasting function or handling player movement?

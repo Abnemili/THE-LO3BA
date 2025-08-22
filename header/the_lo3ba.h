@@ -18,15 +18,19 @@ typedef struct s_player{
 }t_player;
 
 
-typedef struct s_map{
+typedef struct s_map {
     void    *mlx;
     void    *win;
+    void    *img;           // Image buffer
+    char    *img_data;      // Image data pointer
+    int     img_bpp;
+    int     img_size_line;
+    int     img_endian;
     char    **map;
     int     width;
     int     height;
     t_player *player;
 }t_map;
-
 
 
 /* Game settings */
@@ -70,8 +74,15 @@ int     handle_key_input(int keycode, t_map *map);
 void    draw_player(t_map *map);
 int     handle_close(t_map *map);
 void draw_square(t_map *map, int x, int y, int color);
+void render_scene(t_map *map);
+void setup_rendering(t_map *map);
 
 //the libft functions
 void	ft_putnbr(int n);
 
+
+
+// the ray casting concepty and drwinfg rays 
+void draw_ray(t_map *game);
+    
 #endif

@@ -6,12 +6,13 @@ MLX_FLAGS = -lmlx -lXext -lX11
 SRCS = \
 	src/main.c \
 	src/init.c \
+	src/loading_game.c \
+	src/handle_keys.c \
+	src/draw_rays.c \
 	parsing/utils.c \
 	parsing/parsing.c \
 	parsing/check_map.c \
 	parsing/check_walls.c \
-	src/loading_game.c \
-	src/handle_keys.c \
 	parsing/mini_libft.c \
 	get_line/get_next_line.c \
 	get_line/get_next_line_utils.c
