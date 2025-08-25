@@ -53,6 +53,7 @@ typedef struct s_map {
 #define KEY_S   115
 #define KEY_A   97
 #define KEY_D   100
+#define ray_num 32
 
 
 // the parsing functions 
@@ -78,6 +79,8 @@ int     handle_close(t_map *map);
 void draw_square(t_map *map, int x, int y, int color);
 void render_scene(t_map *map);
 void setup_rendering(t_map *map);
+void cast_fov_rays(t_map *game);
+void cast_fov_rays_sparse(t_map *game, int ray_spacing);
 
 //the libft functions
 void	ft_putnbr(int n);

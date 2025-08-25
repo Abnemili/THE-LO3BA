@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 12:03:40 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/22 10:23:43 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/25 15:03:48 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ int handle_key_input(int keycode, t_map *map)
 {
     int new_x, new_y;
     
-    if (keycode == KEY_ESC)
+    if (keycode == KEY_ESC)// the escape kety was pressed 
         return (handle_close(map));
     
     // Handle rotation first
@@ -74,10 +74,12 @@ int handle_key_input(int keycode, t_map *map)
             map->player.angle += 360;
         
         // Clear and redraw for rotation
-        mlx_clear_window(map->mlx, map->win);
+        // mlx_clear_window(map->mlx, map->win);
         set_color(map);
         draw_player(map);
-        draw_ray(map);  // Add this line
+        // draw_ray(map);  // Add this line
+        cast_fov_rays_sparse(map, ray_num);
+        // cast_fov_rays(map);
         return (0);
     }
     else if (keycode == 65363) // Right arrow key
@@ -87,12 +89,14 @@ int handle_key_input(int keycode, t_map *map)
             map->player.angle -= 360;
         
         // Clear and redraw for rotation  
-        mlx_clear_window(map->mlx, map->win);
+        // mlx_clear_window(map->mlx, map->win);
         set_color(map);
         draw_player(map);
-        draw_ray(map);  // Add this line
+        // draw_ray(map);  // Add this line
+        cast_fov_rays_sparse(map, ray_num);
+        // cast_fov_rays(map);
         return (0);
-    }
+    }                                                                                       
     
     // Calculate new position for movement
     new_x = map->player.player_x;
@@ -113,7 +117,7 @@ int handle_key_input(int keycode, t_map *map)
     if (is_valid_move(map, new_x, new_y))
     {
         // Clear and redraw for movement
-        mlx_clear_window(map->mlx, map->win);
+        // mlx_clear_window(map->mlx, map->win);
         set_color(map);
         
         // Update position
@@ -122,7 +126,10 @@ int handle_key_input(int keycode, t_map *map)
         
         // Draw player and ray
         draw_player(map);
-        draw_ray(map);  // This should already be here
+        // draw_ray(map);  // This should already be here
+        cast_fov_rays_sparse(map, ray_num);
+        // cast_fov_rays(map);
+
     }
     
     return (0);
