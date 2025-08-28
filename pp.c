@@ -1,5 +1,55 @@
 #include "header/the_lo3ba.h"
 
+void draw_pixel(t_map *game, int x, int y, int color)
+{
+    // Check if the coordinates are within the drawable area to avoid out-of-bounds access
+    if (x < 0 || y < 0 || x >= game->width * TILE
+            || y >= game->height * TILE)
+        return;
+
+    // Calculate the byte offset in the image data for the pixel at (x, y)
+    // img_size_line = number of bytes in one image row (including padding if any)
+    // img_bpp = bits per pixel, dividing by 8 converts it to bytes per pixel
+    int index = (y * game->img_size_line) + (x * (game->img_bpp / 8));
+
+    // Get a pointer to the pixel's memory location inside the image buffer
+    unsigned int *pixel = (unsigned int *)(game->img_data + index);
+
+    // Set the pixel color at this location
+    *pixel = color;
+}
+
+int handle_close(t_map *map)
+{
+    if (map->win)
+        mlx_destroy_window(map->mlx, map->win);
+    if (map->mlx)
+    {
+        mlx_destroy_display(map->mlx);
+        free(map->mlx);
+    }
+    exit(0);
+    return (0);
+}
+int is_valid_move(t_map *map, int new_x, int new_y)
+{
+    int tile_x, tile_y;
+    
+    // Simple approach: just check the center tile of the player
+    tile_x = (new_x + PLAYER_OFFSET + PLAYER_SIZE/2) / TILE;
+    tile_y = (new_y + PLAYER_OFFSET + PLAYER_SIZE/2) / TILE;
+    
+    // Check bounds
+    if (tile_x < 0 || tile_x >= map->width ||
+        tile_y < 0 || tile_y >= map->height)
+        return (0);
+    
+    // Check if center tile is free (not a wall)
+    if (map->map[tile_y][tile_x] == '1')
+        return (0);
+    
+    return (1);
+}
 
 void cast_single_ray(t_map *game, double ray_angle)
 {
@@ -132,6 +182,29 @@ void cast_fov_rays(t_map *game)
     printf("Finished casting all rays\n");
 }
 
+void cast_fov_rays_sparse(t_map *game, int ray_spacing)
+{
+    double fov = 60.0;                          // Field of view in degrees
+    int window_width = game->width * TILE;      // Total window width in pixels
+    int num_rays = window_width / ray_spacing;  // Fewer rays for visualization
+    
+    
+    double angle_step = fov / (double)num_rays;
+    double start_angle = game->player.angle - (fov / 2.0);
+    
+    for (int i = 0; i < num_rays; i++)
+    {
+        double current_angle = start_angle + (i * angle_step);
+        
+        // Normalize angle
+        while (current_angle < 0) 
+            current_angle += 360.0;
+        while (current_angle >= 360.0) 
+            current_angle -= 360.0;
+        
+        cast_single_ray(game, current_angle);
+    }
+}
 
 int handle_key_input(int keycode, t_map *map)
 {
@@ -196,3 +269,5 @@ int handle_key_input(int keycode, t_map *map)
 
     return 0;
 }
+
+
