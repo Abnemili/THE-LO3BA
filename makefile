@@ -14,9 +14,9 @@ SRCS = \
 	parsing/mini_libft.c \
 	get_line/get_next_line.c \
 	get_line/get_next_line_utils.c \
-	pp.c 
-# 	src/handle_keys.c \
-# 	src/draw_rays.c \
+	src/handle_keys.c \
+	src/draw_rays.c \
+# 	pp.c 
 
 OBJS = $(SRCS:.c=.o)
 

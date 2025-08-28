@@ -6,12 +6,12 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 12:03:40 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/28 17:39:35 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/28 18:40:51 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../header/the_lo3ba.h"
-
+#include <math.h>
 
 int is_valid_move(t_map *map, int new_x, int new_y)
 {

@@ -1,5 +1,52 @@
-#include "header/the_lo3ba.h"
+#include "../header/the_lo3ba.h"
 
+typedef struct s_player{
+    double player_x;            // x and y are the player position cordinate 
+    double player_y;
+    double angle;           //player view direction in degree
+}t_player;
+
+
+typedef struct s_map {
+    void    *mlx;
+    void    *win;
+    void    *img;           // Image buffer
+    char    *img_data;      // Image data pointer
+    int     img_bpp;
+    int     img_size_line;
+    int     img_endian;
+    char    **map;
+    int     width;
+    int     height;
+    t_player player;
+}t_map;
+
+
+/* Game settings */
+#define TILE 32
+#define M_PI 3.14159265358979323846
+#define DEG_TO_RAD(angleDegrees) ((angleDegrees) * M_PI / 180.0)
+
+
+/* Colors */
+#define PLAYER_COLOR 0x00FF00    /* Green */
+#define COLOR_WALL   0X8B0000    /* White */
+#define COLOR_FREE   0x000000    /* Black */
+
+#define MOVE_SPEED 8  // Pixels per keypress
+#define PLAYER_SIZE 8 // Size of player square
+#define PLAYER_OFFSET 12 // Offset from tile corner
+
+/* Key codes */
+#define KEY_ESC 65307
+#define KEY_W   119
+#define KEY_S   115
+#define KEY_A   97
+#define KEY_D   100
+#define ray_num 32
+
+
+// Draw a pixel at (x, y) with the given color on the game image
 void draw_pixel(t_map *game, int x, int y, int color)
 {
     // Check if the coordinates are within the drawable area to avoid out-of-bounds access
@@ -19,142 +66,47 @@ void draw_pixel(t_map *game, int x, int y, int color)
     *pixel = color;
 }
 
-int handle_close(t_map *map)
-{
-    if (map->win)
-        mlx_destroy_window(map->mlx, map->win);
-    if (map->mlx)
-    {
-        mlx_destroy_display(map->mlx);
-        free(map->mlx);
-    }
-    exit(0);
-    return (0);
-}
-int is_valid_move(t_map *map, int new_x, int new_y)
-{
-    int tile_x, tile_y;
-    
-    // Simple approach: just check the center tile of the player
-    tile_x = (new_x + PLAYER_OFFSET + PLAYER_SIZE/2) / TILE;
-    tile_y = (new_y + PLAYER_OFFSET + PLAYER_SIZE/2) / TILE;
-    
-    // Check bounds
-    if (tile_x < 0 || tile_x >= map->width ||
-        tile_y < 0 || tile_y >= map->height)
-        return (0);
-    
-    // Check if center tile is free (not a wall)
-    if (map->map[tile_y][tile_x] == '1')
-        return (0);
-    
-    return (1);
-}
 
+// Cast a single ray at a specific angle and draw it
 void cast_single_ray(t_map *game, double ray_angle)
 {
-    double px = game->player.player_x + PLAYER_OFFSET + PLAYER_SIZE / 2;
-    double py = game->player.player_y + PLAYER_OFFSET + PLAYER_SIZE / 2;
+    double ray_x = game->player.player_x + PLAYER_OFFSET + PLAYER_SIZE/2;
+    double ray_y = game->player.player_y + PLAYER_OFFSET + PLAYER_SIZE/2;
 
     double ray_angle_rad = DEG_TO_RAD(ray_angle);
+    double ray_dx = cos(ray_angle_rad);
+    double ray_dy = sin(ray_angle_rad);
 
-    double ray_dir_x = cos(ray_angle_rad);
-    double ray_dir_y = sin(ray_angle_rad);
+    double step_size = 0.5;
+    int max_depth = 500;
+    int i = 0;
 
-    int map_x = (int)(px / TILE);
-    int map_y = (int)(py / TILE);
-
-    // Step and sideDist for DDA
-    double delta_dist_x = fabs(1 / ray_dir_x);
-    double delta_dist_y = fabs(1 / ray_dir_y);
-
-    double side_dist_x;
-    double side_dist_y;
-
-    int step_x;
-    int step_y;
-
-    int hit = 0;      // Was a wall hit?
-    int side = 0;     // Was it a vertical (0) or horizontal (1) wall?
-
-    // Calculate step and initial side_dist
-    if (ray_dir_x < 0)
+    while (i < max_depth)
     {
-        step_x = -1;
-        side_dist_x = (px - map_x * TILE) * delta_dist_x / TILE;
-    }
-    else
-    {
-        step_x = 1;
-        side_dist_x = ((map_x + 1) * TILE - px) * delta_dist_x / TILE;
-    }
-
-    if (ray_dir_y < 0)
-    {
-        step_y = -1;
-        side_dist_y = (py - map_y * TILE) * delta_dist_y / TILE;
-    }
-    else
-    {
-        step_y = 1;
-        side_dist_y = ((map_y + 1) * TILE - py) * delta_dist_y / TILE;
-    }
-
-    while (!hit)
-    {
-        if (side_dist_x < side_dist_y)
-        {
-            side_dist_x += delta_dist_x;
-            map_x += step_x;
-            side = 0;
-        }
-        else
-        {
-            side_dist_y += delta_dist_y;
-            map_y += step_y;
-            side = 1;
-        }
+        int map_x = (int)(ray_x / TILE);
+        int map_y = (int)(ray_y / TILE);
 
         if (map_x < 0 || map_y < 0 || map_y >= game->height || map_x >= game->width)
             break;
 
         if (game->map[map_y][map_x] == '1')
-            hit = 1;
-    }
-
-    // Calculate hit point
-    double hit_x, hit_y;
-    if (side == 0)
-    {
-        hit_x = map_x * TILE;
-        hit_y = py + (side_dist_x - delta_dist_x) * ray_dir_y * TILE;
-    }
-    else
-    {
-        hit_y = map_y * TILE;
-        hit_x = px + (side_dist_y - delta_dist_y) * ray_dir_x * TILE;
-    }
-
-    // Draw ray
-    for (int i = 0; i < 100; i++)
-    {
-        int draw_x = (int)(px + ray_dir_x * i);
-        int draw_y = (int)(py + ray_dir_y * i);
-        if (draw_x < 0 || draw_y < 0 || draw_x >= game->width * TILE || draw_y >= game->height * TILE)
             break;
-        draw_pixel(game, draw_x, draw_y, 0xFFFF00);
+
+        int pixel_x = (int)ray_x;
+        int pixel_y = (int)ray_y;
+        if (pixel_x >= 0 && pixel_y >= 0 && 
+            pixel_x < game->width * TILE && pixel_y < game->height * TILE)
+        {
+            mlx_pixel_put(game->mlx, game->win, pixel_x, pixel_y, 0xFFFF00);
+        }
+
+        ray_x += ray_dx * step_size;
+        ray_y += ray_dy * step_size;
+        i++;
     }
-
-    // Optionally store hit direction for shading
-    char *dir = "";
-    if (side == 0)
-        dir = (ray_dir_x < 0) ? "W" : "E";
-    else
-        dir = (ray_dir_y < 0) ? "N" : "S";
-
-    printf("Ray hit at tile (%d,%d) | Direction: %s\n", map_x, map_y, dir);
 }
 
+// Cast all rays for 60-degree FOV based on window width
 void cast_fov_rays(t_map *game)
 {
     double fov = 60.0;                          // Field of view in degrees (static)
@@ -182,6 +134,7 @@ void cast_fov_rays(t_map *game)
     printf("Finished casting all rays\n");
 }
 
+// Alternative: Cast fewer rays for better visualization (every Nth column)
 void cast_fov_rays_sparse(t_map *game, int ray_spacing)
 {
     double fov = 60.0;                          // Field of view in degrees
@@ -205,69 +158,78 @@ void cast_fov_rays_sparse(t_map *game, int ray_spacing)
         cast_single_ray(game, current_angle);
     }
 }
-
 int handle_key_input(int keycode, t_map *map)
 {
-    double new_x = map->player.player_x;
-    double new_y = map->player.player_y;
-    double rad = DEG_TO_RAD(map->player.angle);
-    double move_step = MOVE_SPEED;
-
-    if (keycode == KEY_ESC) // Escape key pressed
-        return handle_close(map);
-
-    // Handle rotation keys (Left & Right arrows)
+    int new_x, new_y;
+    
+    if (keycode == KEY_ESC)// the escape kety was pressed 
+        return (handle_close(map));
+    
+    // Handle rotation first
     if (keycode == 65361) // Left arrow key
     {
         map->player.angle -= 5.0;
         if (map->player.angle < 0)
-            map->player.angle += 360.0;
+            map->player.angle += 360;
+        
+        // Clear and redraw for rotation
+        // mlx_clear_window(map->mlx, map->win);
+        set_color(map);
+        draw_player(map);
+        // draw_ray(map);  // Add this line
+        cast_fov_rays_sparse(map, ray_num);
+        // cast_fov_rays(map);
+        return (0);
     }
     else if (keycode == 65363) // Right arrow key
     {
         map->player.angle += 5.0;
-        if (map->player.angle >= 360.0)
-            map->player.angle -= 360.0;
-    }
-    // Movement keys (WASD)
-    else if (keycode == KEY_W) // Move forward
-    {
-        new_x += cos(rad) * move_step;
-        new_y += sin(rad) * move_step;
-    }
-    else if (keycode == KEY_S) // Move backward
-    {
-        new_x -= cos(rad) * move_step;
-        new_y -= sin(rad) * move_step;
-    }
-    else if (keycode == KEY_A) // Strafe left
-    {
-        new_x += cos(rad - M_PI / 2) * move_step;
-        new_y += sin(rad - M_PI / 2) * move_step;
-    }
-    else if (keycode == KEY_D) // Strafe right
-    {
-        new_x += cos(rad + M_PI / 2) * move_step;
-        new_y += sin(rad + M_PI / 2) * move_step;
-    }
+        if (map->player.angle >= 360)
+            map->player.angle -= 360;
+        
+        // Clear and redraw for rotation  
+        // mlx_clear_window(map->mlx, map->win);
+        set_color(map);
+        draw_player(map);
+        // draw_ray(map);  // Add this line
+        cast_fov_rays_sparse(map, ray_num);
+        // cast_fov_rays(map);
+        return (0);
+    }                                                                                       
+    
+    // Calculate new position for movement
+    new_x = map->player.player_x;
+    new_y = map->player.player_y;
+    
+    if (keycode == KEY_W) // W - Up
+        new_y -= MOVE_SPEED;
+    else if (keycode == KEY_S) // S - Down
+        new_y += MOVE_SPEED;
+    else if (keycode == KEY_A) // A - Left
+        new_x -= MOVE_SPEED;
+    else if (keycode == KEY_D) // D - Right
+        new_x += MOVE_SPEED;
     else
-        return 0; // No relevant key pressed
-
-    // Check valid move before updating position
-    if (is_valid_move(map, (int)new_x, (int)new_y))
+        return (0);
+    
+    // Check if move is valid
+    if (is_valid_move(map, new_x, new_y))
     {
-        // Update player position
+        // Clear and redraw for movement
+        // mlx_clear_window(map->mlx, map->win);
+        set_color(map);
+        
+        // Update position
         map->player.player_x = new_x;
         map->player.player_y = new_y;
+        
+        // Draw player and ray
+        draw_player(map);
+        // draw_ray(map);  // This should already be here
+        cast_fov_rays_sparse(map, ray_num);
+        // cast_fov_rays(map);
+
     }
-
-    // Clear window and redraw everything after movement or rotation
-    mlx_clear_window(map->mlx, map->win);
-    set_color(map);
-    draw_player(map);
-    cast_fov_rays_sparse(map, ray_num);
-
-    return 0;
+    
+    return (0);
 }
-
-
