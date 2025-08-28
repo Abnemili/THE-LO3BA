@@ -1,15 +1,25 @@
 #include "../header/the_lo3ba.h"
 
-
+// Draw a pixel at (x, y) with the given color on the game image
 void draw_pixel(t_map *game, int x, int y, int color)
 {
-    if (x < 0 || y < 0 || x >= game->width * TILE || y >= game->height * TILE)
+    // Check if the coordinates are within the drawable area to avoid out-of-bounds access
+    if (x < 0 || y < 0 || x >= game->width * TILE
+            || y >= game->height * TILE)
         return;
-    
+
+    // Calculate the byte offset in the image data for the pixel at (x, y)
+    // img_size_line = number of bytes in one image row (including padding if any)
+    // img_bpp = bits per pixel, dividing by 8 converts it to bytes per pixel
     int index = (y * game->img_size_line) + (x * (game->img_bpp / 8));
+
+    // Get a pointer to the pixel's memory location inside the image buffer
     unsigned int *pixel = (unsigned int *)(game->img_data + index);
+
+    // Set the pixel color at this location
     *pixel = color;
 }
+
 
 // Cast a single ray at a specific angle and draw it
 void cast_single_ray(t_map *game, double ray_angle)
@@ -56,8 +66,7 @@ void cast_fov_rays(t_map *game)
     double fov = 60.0;                          // Field of view in degrees (static)
     int window_width = game->width * TILE;      // Total window width in pixels
     int num_rays = window_width;                // One ray per pixel column
-    
-    printf("Casting %d rays for FOV of %.1f degrees\n", num_rays, fov);
+   
     
     double angle_step = fov / (double)num_rays; // Angle between each ray
     double start_angle = game->player.angle - (fov / 2.0); // Left edge of FOV
@@ -86,8 +95,6 @@ void cast_fov_rays_sparse(t_map *game, int ray_spacing)
     int window_width = game->width * TILE;      // Total window width in pixels
     int num_rays = window_width / ray_spacing;  // Fewer rays for visualization
     
-    printf("Casting %d rays (every %d pixels) for FOV of %.1f degrees\n", 
-           num_rays, ray_spacing, fov);
     
     double angle_step = fov / (double)num_rays;
     double start_angle = game->player.angle - (fov / 2.0);
