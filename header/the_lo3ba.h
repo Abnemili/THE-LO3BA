@@ -35,7 +35,8 @@ typedef struct s_map {
 
 /* Game settings */
 #define TILE 32
-#define DEG_TO_RAD(angleDegrees) ((angleDegrees) * 3.14159265358979323846 / 180.0)
+#define M_PI 3.14159265358979323846
+#define DEG_TO_RAD(angleDegrees) ((angleDegrees) * M_PI / 180.0)
 
 
 /* Colors */
