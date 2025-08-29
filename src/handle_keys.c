@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 12:03:40 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/28 18:40:51 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/29 15:24:04 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ int handle_key_input(int keycode, t_map *map)
         set_color(map);
         draw_player(map);
         // draw_ray(map);  // Add this line
-        cast_fov_rays_sparse(map, ray_num);
+        cast_fov_rays(map);
         // cast_fov_rays(map);
         return (0);
     }
@@ -93,7 +93,7 @@ int handle_key_input(int keycode, t_map *map)
         set_color(map);
         draw_player(map);
         // draw_ray(map);  // Add this line
-        cast_fov_rays_sparse(map, ray_num);
+         cast_fov_rays(map);
         // cast_fov_rays(map);
         return (0);
     }                                                                                       
@@ -127,7 +127,7 @@ int handle_key_input(int keycode, t_map *map)
         // Draw player and ray
         draw_player(map);
         // draw_ray(map);  // This should already be here
-        cast_fov_rays_sparse(map, ray_num);
+         cast_fov_rays(map);
         // cast_fov_rays(map);
 
     }

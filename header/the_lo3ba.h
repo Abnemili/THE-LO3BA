@@ -10,29 +10,6 @@
 # include <stdlib.h>
 # include <unistd.h>
 #include <math.h>
-
-typedef struct s_player{
-    double player_x;            // x and y are the player position cordinate 
-    double player_y;
-    double angle;           //player view direction in degree
-}t_player;
-
-
-typedef struct s_map {
-    void    *mlx;
-    void    *win;
-    void    *img;           // Image buffer
-    char    *img_data;      // Image data pointer
-    int     img_bpp;
-    int     img_size_line;
-    int     img_endian;
-    char    **map;
-    int     width;
-    int     height;
-    t_player player;
-}t_map;
-
-
 /* Game settings */
 #define TILE 32
 #define M_PI 3.14159265358979323846
@@ -55,6 +32,37 @@ typedef struct s_map {
 #define KEY_A   97
 #define KEY_D   100
 #define ray_num 32
+
+typedef struct s_ray {
+    double wall_x;      // Wall hit x coordinate
+    double wall_y;      // Wall hit y coordinate
+    double distance;    // Distance to wall
+    int hit_side;       // 0 if horizontal wall, 1 if vertical wall
+} t_ray;
+
+
+typedef struct s_player{
+    double player_x;            // x and y are the player position cordinate 
+    double player_y;
+    double angle;           //player view direction in degree
+}t_player;
+
+
+typedef struct s_map {
+    void    *mlx;
+    void    *win;
+    void    *img;           // Image buffer
+    char    *img_data;      // Image data pointer
+    int     img_bpp;
+    int     img_size_line;
+    int     img_endian;
+    char    **map;
+    int     width;
+    int     height;
+    t_ray rays[ray_num];
+    t_player player;
+}t_map;
+
 
 
 // the parsing functions 
