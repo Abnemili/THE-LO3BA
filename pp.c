@@ -54,9 +54,7 @@ void draw_pixel(t_map *game, int x, int y, int color)
             || y >= game->height * TILE)
         return;
 
-    // Calculate the byte offset in the image data for the pixel at (x, y)
-    // img_size_line = number of bytes in one image row (including padding if any)
-    // img_bpp = bits per pixel, dividing by 8 converts it to bytes per pixel
+
     int index = (y * game->img_size_line) + (x * (game->img_bpp / 8));
 
     // Get a pointer to the pixel's memory location inside the image buffer
