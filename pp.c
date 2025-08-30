@@ -1,60 +1,13 @@
 #include <math.h>
 #include <stdio.h>
-
-
-/* Game settings */
-#define TILE 32
-#define M_PI 3.14159265358979323846
-#define DEG_TO_RAD(angleDegrees) ((angleDegrees) * M_PI / 180.0)
-
-
-/* Colors */
-#define PLAYER_COLOR 0x00FF00    /* Green */
-#define COLOR_WALL   0X8B0000    /* White */
-#define COLOR_FREE   0x000000    /* Black */
-
-#define MOVE_SPEED 8  // Pixels per keypress
-#define PLAYER_SIZE 8 // Size of player square
-#define PLAYER_OFFSET 12 // Offset from tile corner
-
-/* Key codes */
-#define KEY_ESC 65307
-#define KEY_W   119
-#define KEY_S   115
-#define KEY_A   97
-#define KEY_D   100
-#define ray_num 32
+#include "header/the_lo3ba.h"
 
 typedef struct s_ray {
     double wall_x;      // Wall hit x coordinate
     double wall_y;      // Wall hit y coordinate
     double distance;    // Distance to wall
-    int hit_side;       // 0 if horizontal wall, 1 if vertical wall
+    int hit_side;       // 0 if vertical wall, 1 if horizontal wall
 } t_ray;
-
-
-typedef struct s_player{
-    double player_x;            // x and y are the player position cordinate 
-    double player_y;
-    double angle;           //player view direction in degree
-}t_player;
-
-
-typedef struct s_map {
-    void    *mlx;
-    void    *win;
-    void    *img;           // Image buffer
-    char    *img_data;      // Image data pointer
-    int     img_bpp;
-    int     img_size_line;
-    int     img_endian;
-    char    **map;
-    int     width;
-    int     height;
-    t_ray rays[ray_num];
-    t_player player;
-}t_map;
-
 
 // Check if a grid position contains a wall
 int is_wall(t_map *map, int grid_x, int grid_y)
@@ -62,6 +15,17 @@ int is_wall(t_map *map, int grid_x, int grid_y)
     if (grid_x < 0 || grid_x >= map->width || grid_y < 0 || grid_y >= map->height)
         return (1); // Out of bounds = wall
     return (map->map[grid_y][grid_x] == '1');
+}
+
+// Simple drawing function like yours
+void draw_pixel(t_map *game, int x, int y, int color)
+{
+    if (x < 0 || y < 0 || x >= game->width * TILE || y >= game->height * TILE)
+        return;
+    
+    int index = (y * game->img_size_line) + (x * (game->img_bpp / 8));
+    unsigned int *pixel = (unsigned int *)(game->img_data + index);
+    *pixel = color;
 }
 
 // Cast a single ray using DDA algorithm
@@ -117,21 +81,21 @@ t_ray cast_single_ray(t_map *map, double ray_angle)
         side_dist_y = (map_y + 1.0 - ray_y / TILE) * delta_dist_y;
     }
     
-    // Perform DDA
+    // Perform DDA - check horizontal intersections first, then vertical
     while (hit == 0)
     {
-        // Jump to next map square, either in x-direction, or in y-direction
-        if (side_dist_x < side_dist_y)
-        {
-            side_dist_x += delta_dist_x;
-            map_x += step_x;
-            side = 0; // Vertical wall (hit from x-direction)
-        }
-        else
+        // Check horizontal intersections first
+        if (side_dist_y < side_dist_x)
         {
             side_dist_y += delta_dist_y;
             map_y += step_y;
-            side = 1; // Horizontal wall (hit from y-direction)
+            side = 1; // Horizontal wall
+        }
+        else // Then check vertical intersections
+        {
+            side_dist_x += delta_dist_x;
+            map_x += step_x;
+            side = 0; // Vertical wall
         }
         
         // Check if ray has hit a wall
@@ -157,17 +121,51 @@ t_ray cast_single_ray(t_map *map, double ray_angle)
     return (ray);
 }
 
-// Cast FOV rays using DDA algorithm
-void cast_fov_rays(t_map *map)
+// Simple ray drawing using your stepping method
+void draw_ray_simple(t_map *game, double ray_angle)
 {
-    double fov = 60.0; // Field of view in degrees
+    double ray_x = game->player.player_x + PLAYER_OFFSET + PLAYER_SIZE/2;
+    double ray_y = game->player.player_y + PLAYER_OFFSET + PLAYER_SIZE/2;
+
+    double ray_angle_rad = DEG_TO_RAD(ray_angle);
+    double ray_dx = cos(ray_angle_rad);
+    double ray_dy = sin(ray_angle_rad);
+
+    double step_size = 0.7;
+    int max_depth = 500;
+    int i = 0;
+
+    while (i < max_depth)
+    {
+        int map_x = (int)(ray_x / TILE);
+        int map_y = (int)(ray_y / TILE);
+
+        // Bounds check
+        if (map_x < 0 || map_y < 0 || map_y >= game->height || map_x >= game->width)
+            break;
+
+        // Wall check
+        if (game->map[map_y][map_x] == '1')
+            break;
+
+        // Draw ray pixel
+        int pixel_x = (int)ray_x;
+        int pixel_y = (int)ray_y;
+        draw_pixel(game, pixel_x, pixel_y, 0xFFFF00); // Yellow ray
+
+        // Step forward
+        ray_x += ray_dx * step_size;
+        ray_y += ray_dy * step_size;
+        i++;
+    }
+}
+
+// Cast FOV rays using DDA algorithm but draw them simply
+void cast_fov_rays(t_map *game)
+{
+    double fov = 60.0;  // Field of view in degrees
     double angle_step = fov / ray_num;
-    double start_angle = map->player.angle - (fov / 2.0);
-    
-    printf("=== Casting %d FOV rays ===\n", ray_num);
-    printf("Player position: (%.2f, %.2f)\n", map->player.player_x, map->player.player_y);
-    printf("Player angle: %.2f degrees\n", map->player.angle);
-    printf("FOV: %.2f degrees (%.2f to %.2f)\n", fov, start_angle, start_angle + fov);
+    double start_angle = game->player.angle - (fov / 2.0);
     
     for (int i = 0; i < ray_num; i++)
     {
@@ -179,81 +177,14 @@ void cast_fov_rays(t_map *map)
         while (current_angle >= 360)
             current_angle -= 360;
         
-        // Cast single ray
-        t_ray ray = cast_single_ray(map, current_angle);
+        // Get wall info using DDA
+        t_ray ray_data = cast_single_ray(game, current_angle);
         
-        printf("Ray %2d: angle=%.2f°, wall=(%.2f,%.2f), dist=%.2f, side=%s\n",
-               i, current_angle, ray.wall_x, ray.wall_y, ray.distance,
-               ray.hit_side == 0 ? "vertical" : "horizontal");
+        // Draw ray using simple stepping method
+        draw_ray_simple(game, current_angle);
         
-        // Here you can store the ray data or use it for rendering
-        // For example, you might store it in an array for later use:
-        // map->rays[i] = ray;
+        // Optional: Use ray_data for distance calculations, 3D rendering, etc.
+        // printf("Ray %d: dist=%.1f, wall=(%.1f,%.1f)\n", 
+        //        i, ray_data.distance, ray_data.wall_x, ray_data.wall_y);
     }
-}
-
-// Alternative implementation with separate horizontal and vertical checks
-// (if you specifically want to check horizontal intersections first)
-t_ray cast_single_ray_separate_checks(t_map *map, double ray_angle)
-{
-    t_ray horizontal_ray = {0, 0, INFINITY, 1};
-    t_ray vertical_ray = {0, 0, INFINITY, 0};
-    
-    double ray_x = map->player.player_x;
-    double ray_y = map->player.player_y;
-    double ray_dir_x = cos(DEG_TO_RAD(ray_angle));
-    double ray_dir_y = sin(DEG_TO_RAD(ray_angle));
-    
-    // === Check Horizontal Intersections First ===
-    if (ray_dir_y != 0) // Avoid division by zero
-    {
-        int step_y = (ray_dir_y > 0) ? 1 : -1;
-        int grid_y = (int)(ray_y / TILE) + (step_y > 0 ? 1 : 0);
-        
-        while (grid_y >= 0 && grid_y < map->height)
-        {
-            double intersect_y = grid_y * TILE;
-            double intersect_x = ray_x + (intersect_y - ray_y) * ray_dir_x / ray_dir_y;
-            
-            int grid_x = (int)(intersect_x / TILE);
-            
-            if (is_wall(map, grid_x, (step_y > 0) ? grid_y : grid_y - 1))
-            {
-                horizontal_ray.wall_x = intersect_x;
-                horizontal_ray.wall_y = intersect_y;
-                horizontal_ray.distance = sqrt((intersect_x - ray_x) * (intersect_x - ray_x) + 
-                                             (intersect_y - ray_y) * (intersect_y - ray_y));
-                break;
-            }
-            grid_y += step_y;
-        }
-    }
-    
-    // === Check Vertical Intersections ===
-    if (ray_dir_x != 0) // Avoid division by zero
-    {
-        int step_x = (ray_dir_x > 0) ? 1 : -1;
-        int grid_x = (int)(ray_x / TILE) + (step_x > 0 ? 1 : 0);
-        
-        while (grid_x >= 0 && grid_x < map->width)
-        {
-            double intersect_x = grid_x * TILE;
-            double intersect_y = ray_y + (intersect_x - ray_x) * ray_dir_y / ray_dir_x;
-            
-            int grid_y = (int)(intersect_y / TILE);
-            
-            if (is_wall(map, (step_x > 0) ? grid_x : grid_x - 1, grid_y))
-            {
-                vertical_ray.wall_x = intersect_x;
-                vertical_ray.wall_y = intersect_y;
-                vertical_ray.distance = sqrt((intersect_x - ray_x) * (intersect_x - ray_x) + 
-                                           (intersect_y - ray_y) * (intersect_y - ray_y));
-                break;
-            }
-            grid_x += step_x;
-        }
-    }
-    
-    // Return the closest intersection
-    return (horizontal_ray.distance < vertical_ray.distance) ? horizontal_ray : vertical_ray;
 }
