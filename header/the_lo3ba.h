@@ -11,15 +11,15 @@
 # include <unistd.h>
 #include <math.h>
 /* Game settings */
-#define TILE 32
+#define TILE 64
 #define M_PI 3.14159265358979323846
 #define DEG_TO_RAD(angleDegrees) ((angleDegrees) * M_PI / 180.0)
 
 
 /* Colors */
 #define PLAYER_COLOR 0x00FF00    /* Green */
-#define COLOR_WALL   0X8B0000    /* White */
-#define COLOR_FREE   0x000000    /* Black */
+#define COLOR_WALL   0x4B0082    /* White */
+#define COLOR_FREE   0x006600    /* Black */
 
 #define MOVE_SPEED 8  // Pixels per keypress
 #define PLAYER_SIZE 8 // Size of player square
@@ -31,7 +31,7 @@
 #define KEY_S   115
 #define KEY_A   97
 #define KEY_D   100
-#define ray_num 1
+#define ray_num 50
 
 // typedef struct s_ray {
 //     double wall_x;
