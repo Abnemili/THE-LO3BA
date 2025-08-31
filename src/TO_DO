@@ -1,7 +1,7 @@
 TO DO IN THIS PROJECT :
 
 1. **Implement Raycasting:**
-   - Cast rays from the player's position, one for each vertical stripe on the screen.
+   - Cast rays from the player's position, one for each vertical stripe on the screen.  // done
    - Calculate the distance to the nearest wall for each ray.
    - Use these distances to determine the height of the wall slice to draw, creating a pseudo-3D effect.
 

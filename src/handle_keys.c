@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 12:03:40 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/31 18:08:51 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/31 18:40:30 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,9 +104,7 @@ int handle_key_input(int keycode, t_map *map)
     // Check if move is valid
     if (is_valid_move(map, new_x, new_y))
     {
-        // Clear and redraw for movement
-        // mlx_clear_window(map->mlx, map->win);
-        // Update position
+
         map->player.player_x = new_x;
         map->player.player_y = new_y;
         
