@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 09:28:38 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/22 13:06:45 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/31 18:17:15 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,8 @@ int main(int ac, char **av)
     load_game(map);
 
     // Initialize image buffer for flicker-free rendering
-    setup_rendering(map);
-    render_scene(map);
+    // setup_rendering(map);
+    // render_scene(map);
 
     return (0);
 }

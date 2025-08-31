@@ -33,11 +33,6 @@
 #define KEY_D   100
 #define ray_num 50
 
-// typedef struct s_ray {
-//     double wall_x;
-//     double wall_y;
-//     double distance;
-// } t_ray;
 
 
 typedef struct s_ray {
