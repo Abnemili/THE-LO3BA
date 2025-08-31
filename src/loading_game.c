@@ -6,7 +6,7 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 12:03:28 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/28 21:34:15 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/31 15:07:23 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,19 +52,36 @@ void setup_rendering(t_map *map)
     init_image(map);
 }
 // drawing the player 
+// void draw_player(t_map *map)
+// {
+//     int i;
+//     int j;
+
+//     i = 0;
+//     while (PLAYER_SIZE > i)
+//     {
+//         j = 0;
+//         while (PLAYER_SIZE > j)
+//         {
+//             mlx_pixel_put(map->mlx, map->win, 
+//                 map->player.player_x  + PLAYER_OFFSET + i,
+//                 map->player.player_y + PLAYER_OFFSET + j, 
+//                 PLAYER_COLOR);
+//             j++;
+//         }
+//         i++;
+//     }
+// }
 void draw_player(t_map *map)
 {
-    int i;
-    int j;
-
-    i = 0;
+    int i = 0;
     while (PLAYER_SIZE > i)
     {
-        j = 0;
+        int j = 0;
         while (PLAYER_SIZE > j)
         {
-            mlx_pixel_put(map->mlx, map->win, 
-                map->player.player_x  + PLAYER_OFFSET + i,
+            pixel_put_img(map, 
+                map->player.player_x + PLAYER_OFFSET + i,
                 map->player.player_y + PLAYER_OFFSET + j, 
                 PLAYER_COLOR);
             j++;
@@ -171,6 +188,7 @@ void  mlx_connection(t_map *map)
 void load_game(t_map *map)
 {
     mlx_connection(map); // done
+    setup_rendering(map);
     init_player_position(map); // done
  
     // Initial render

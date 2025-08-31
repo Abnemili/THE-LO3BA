@@ -31,7 +31,14 @@
 #define KEY_S   115
 #define KEY_A   97
 #define KEY_D   100
-#define ray_num 32
+#define ray_num 1
+
+// typedef struct s_ray {
+//     double wall_x;
+//     double wall_y;
+//     double distance;
+// } t_ray;
+
 
 typedef struct s_ray {
     double wall_x;      // Wall hit x coordinate
@@ -70,7 +77,7 @@ t_map	*check_map(char *av);
 void	check_ext(char *name);
 void	check_shape(t_map *map);
 void	check_walls(t_map *map);
-
+void pixel_put_img(t_map *map, int x, int y, int color);
 //init the dara for the map 
 t_map	*fill_map(char *av);
 
@@ -97,7 +104,7 @@ void	ft_putnbr(int n);
 
 
 // the ray casting concepty and drwinfg rays 
-void draw_ray(t_map *game);
+// void draw_ray(t_map *game);
 
 void draw_pixel(t_map *game, int x, int y, int color);
     

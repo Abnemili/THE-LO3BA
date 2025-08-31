@@ -1,5 +1,5 @@
 #include "../header/the_lo3ba.h"
-x
+
 // Draw a pixel at (x, y) with the given color on the game image
 void draw_pixel(t_map *game, int x, int y, int color)
 {

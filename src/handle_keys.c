@@ -6,12 +6,12 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 12:03:40 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/29 15:24:04 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/08/31 15:02:43 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../header/the_lo3ba.h"
-#include <math.h>
+
 
 int is_valid_move(t_map *map, int new_x, int new_y)
 {
@@ -75,11 +75,10 @@ int handle_key_input(int keycode, t_map *map)
         
         // Clear and redraw for rotation
         // mlx_clear_window(map->mlx, map->win);
-        set_color(map);
-        draw_player(map);
-        // draw_ray(map);  // Add this line
-        cast_fov_rays(map);
-        // cast_fov_rays(map);
+       // Instead of calling set_color() and draw_player() separately:
+        render_scene(map);  // This clears, draws map, and draws player
+        cast_fov_rays(map); // Then cast rays
+        mlx_put_image_to_window(map->mlx, map->win, map->img, 0, 0); // Show final result
         return (0);
     }
     else if (keycode == 65363) // Right arrow key
@@ -90,11 +89,10 @@ int handle_key_input(int keycode, t_map *map)
         
         // Clear and redraw for rotation  
         // mlx_clear_window(map->mlx, map->win);
-        set_color(map);
-        draw_player(map);
-        // draw_ray(map);  // Add this line
-         cast_fov_rays(map);
-        // cast_fov_rays(map);
+            // Instead of calling set_color() and draw_player() separately:
+        render_scene(map);  // This clears, draws map, and draws player
+        cast_fov_rays(map); // Then cast rays
+        mlx_put_image_to_window(map->mlx, map->win, map->img, 0, 0); // Show final result
         return (0);
     }                                                                                       
     
@@ -118,17 +116,14 @@ int handle_key_input(int keycode, t_map *map)
     {
         // Clear and redraw for movement
         // mlx_clear_window(map->mlx, map->win);
-        set_color(map);
         
         // Update position
         map->player.player_x = new_x;
         map->player.player_y = new_y;
         
-        // Draw player and ray
-        draw_player(map);
-        // draw_ray(map);  // This should already be here
-         cast_fov_rays(map);
-        // cast_fov_rays(map);
+        render_scene(map);  // This clears, draws map, and draws player
+        cast_fov_rays(map); // Then cast rays
+        mlx_put_image_to_window(map->mlx, map->win, map->img, 0, 0); // Show final result
 
     }
     

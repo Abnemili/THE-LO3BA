@@ -1,354 +1,258 @@
-#include "../header/the_lo3ba.h"
+#include <math.h>
+#include <stdio.h>
+#include "header/the_lo3ba.h"
 
-typedef struct s_player{
-    double player_x;            
-    double player_y;
-    double angle;           
-}t_player;
 
-typedef struct s_map {
-    void    *mlx;
-    void    *win;
-    void    *img;           
-    char    *img_data;      
-    int     img_bpp;
-    int     img_size_line;
-    int     img_endian;
-    char    **map;
-    int     width;
-    int     height;
-    t_player player;
-}t_map;
+typedef struct s_ray {
+    double wall_x;      // Wall hit x coordinate
+    double wall_y;      // Wall hit y coordinate
+    double distance;    // Distance to wall
+    int hit_side;       // 0 if horizontal wall, 1 if vertical wall
+} t_ray;
 
-// MODIFIED: Added hit info structure for storing ray results
-typedef struct s_hit {
-    double distance;
-    double hit_x;
-    double hit_y;
-    int is_vertical;  // 0 = horizontal wall, 1 = vertical wall
-} t_hit;
-
-#define TILE 32
-#define M_PI 3.14159265358979323846
-#define DEG_TO_RAD(angleDegrees) ((angleDegrees) * M_PI / 180.0)
-
-#define PLAYER_COLOR 0x00FF00    
-#define COLOR_WALL   0X8B0000    
-#define COLOR_FREE   0x000000    
-
-#define MOVE_SPEED 8  
-#define PLAYER_SIZE 8 
-#define PLAYER_OFFSET 12 
-
-#define KEY_ESC 65307
-#define KEY_W   119
-#define KEY_S   115
-#define KEY_A   97
-#define KEY_D   100
-#define ray_num 32
-
-void draw_pixel(t_map *game, int x, int y, int color)
+// Check if a grid position contains a wall
+int is_wall(t_map *map, int grid_x, int grid_y)
 {
-    if (x < 0 || y < 0 || x >= game->width * TILE || y >= game->height * TILE)
-        return;
-
-    int index = (y * game->img_size_line) + (x * (game->img_bpp / 8));
-    unsigned int *pixel = (unsigned int *)(game->img_data + index);
-    *pixel = color;
+    if (grid_x < 0 || grid_x >= map->width || grid_y < 0 || grid_y >= map->height)
+        return (1); // Out of bounds = wall
+    return (map->map[grid_y][grid_x] == '1');
 }
 
-// MODIFIED: Check horizontal line intersections first
-t_hit check_horizontal_hit(t_map *game, double ray_angle)
+// Cast a single ray using DDA algorithm
+t_ray cast_single_ray(t_map *map, double ray_angle)
 {
-    t_hit hit = {0};
-    double px = game->player.player_x + PLAYER_OFFSET + PLAYER_SIZE/2;
-    double py = game->player.player_y + PLAYER_OFFSET + PLAYER_SIZE/2;
+    t_ray ray = {0, 0, 0, 0};
     
-    double ray_angle_rad = DEG_TO_RAD(ray_angle);
+    // Ray starting position (player position)
+    double ray_x = map->player.player_x;
+    double ray_y = map->player.player_y;
     
-    // Avoid division by zero
-    if (sin(ray_angle_rad) == 0)
+    // Ray direction
+    double ray_dir_x = cos(DEG_TO_RAD(ray_angle));
+    double ray_dir_y = sin(DEG_TO_RAD(ray_angle));
+    
+    // Which grid cell we're in
+    int map_x = (int)(ray_x / TILE);
+    int map_y = (int)(ray_y / TILE);
+    
+    // Length of ray from current position to next x or y side
+    double side_dist_x, side_dist_y;
+    
+    // Length of ray from one x-side to next x-side, or from one y-side to next y-side
+    double delta_dist_x = fabs(1 / ray_dir_x);
+    double delta_dist_y = fabs(1 / ray_dir_y);
+    
+    // What direction to step in x or y (either +1 or -1)
+    int step_x, step_y;
+    
+    int hit = 0; // Was there a wall hit?
+    int side;    // Was it a horizontal or vertical wall hit?
+    
+    // Calculate step direction and initial side_dist
+    if (ray_dir_x < 0)
     {
-        hit.distance = 999999;
-        return hit;
+        step_x = -1;
+        side_dist_x = (ray_x / TILE - map_x) * delta_dist_x;
+    }
+    else
+    {
+        step_x = 1;
+        side_dist_x = (map_x + 1.0 - ray_x / TILE) * delta_dist_x;
     }
     
-    int looking_up = sin(ray_angle_rad) < 0;
-    
-    // Find first horizontal grid line
-    double y_step = TILE;
-    double first_y = floor(py / TILE) * TILE;
-    if (!looking_up)
-        first_y += TILE;
-    else
-        y_step = -TILE;
-    
-    // Calculate x step based on angle
-    double x_step = TILE / tan(ray_angle_rad);
-    if ((looking_up && x_step > 0) || (!looking_up && x_step < 0))
-        x_step = -x_step;
-    
-    double check_x = px + (first_y - py) / tan(ray_angle_rad);
-    double check_y = first_y;
-    
-    // Step through horizontal lines
-    while (check_x >= 0 && check_x < game->width * TILE && 
-           check_y >= 0 && check_y < game->height * TILE)
+    if (ray_dir_y < 0)
     {
-        int map_x = (int)(check_x / TILE);
-        int map_y = (int)(check_y / TILE);
-        
-        // Adjust for looking up
-        if (looking_up)
-            map_y--;
-            
-        if (map_x < 0 || map_y < 0 || map_x >= game->width || map_y >= game->height)
-            break;
-            
-        if (game->map[map_y][map_x] == '1')
+        step_y = -1;
+        side_dist_y = (ray_y / TILE - map_y) * delta_dist_y;
+    }
+    else
+    {
+        step_y = 1;
+        side_dist_y = (map_y + 1.0 - ray_y / TILE) * delta_dist_y;
+    }
+    
+    // Perform DDA
+    while (hit == 0)
+    {
+        // Jump to next map square, either in x-direction, or in y-direction
+        if (side_dist_x < side_dist_y)
         {
-            hit.hit_x = check_x;
-            hit.hit_y = check_y;
-            hit.distance = sqrt((check_x - px) * (check_x - px) + (check_y - py) * (check_y - py));
-            hit.is_vertical = 0;
-            return hit;
+            side_dist_x += delta_dist_x;
+            map_x += step_x;
+            side = 0; // Vertical wall (hit from x-direction)
+        }
+        else
+        {
+            side_dist_y += delta_dist_y;
+            map_y += step_y;
+            side = 1; // Horizontal wall (hit from y-direction)
         }
         
-        check_x += x_step;
-        check_y += y_step;
+        // Check if ray has hit a wall
+        if (is_wall(map, map_x, map_y))
+            hit = 1;
     }
     
-    hit.distance = 999999;
-    return hit;
+    // Calculate distance and wall hit coordinates
+    if (side == 0) // Vertical wall
+    {
+        ray.distance = (map_x - ray_x / TILE + (1 - step_x) / 2) / ray_dir_x * TILE;
+        ray.wall_x = map_x * TILE + (step_x < 0 ? TILE : 0);
+        ray.wall_y = ray_y + ray.distance * ray_dir_y;
+    }
+    else // Horizontal wall
+    {
+        ray.distance = (map_y - ray_y / TILE + (1 - step_y) / 2) / ray_dir_y * TILE;
+        ray.wall_y = map_y * TILE + (step_y < 0 ? TILE : 0);
+        ray.wall_x = ray_x + ray.distance * ray_dir_x;
+    }
+    
+    ray.hit_side = side;
+    return (ray);
 }
 
-// MODIFIED: Check vertical line intersections
-t_hit check_vertical_hit(t_map *game, double ray_angle)
+// Draw a line using Bresenham's algorithm (for ray visualization)
+void draw_line(t_map *map, int x0, int y0, int x1, int y1, int color)
 {
-    t_hit hit = {0};
-    double px = game->player.player_x + PLAYER_OFFSET + PLAYER_SIZE/2;
-    double py = game->player.player_y + PLAYER_OFFSET + PLAYER_SIZE/2;
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+    int err = dx - dy;
     
-    double ray_angle_rad = DEG_TO_RAD(ray_angle);
+    int x = x0;
+    int y = y0;
     
-    // Avoid division by zero
-    if (cos(ray_angle_rad) == 0)
+    while (1)
     {
-        hit.distance = 999999;
-        return hit;
-    }
-    
-    int looking_left = cos(ray_angle_rad) < 0;
-    
-    // Find first vertical grid line
-    double x_step = TILE;
-    double first_x = floor(px / TILE) * TILE;
-    if (!looking_left)
-        first_x += TILE;
-    else
-        x_step = -TILE;
-    
-    // Calculate y step based on angle
-    double y_step = TILE * tan(ray_angle_rad);
-    if ((looking_left && y_step < 0) || (!looking_left && y_step > 0))
-        y_step = -y_step;
-    
-    double check_x = first_x;
-    double check_y = py + (first_x - px) * tan(ray_angle_rad);
-    
-    // Step through vertical lines
-    while (check_x >= 0 && check_x < game->width * TILE && 
-           check_y >= 0 && check_y < game->height * TILE)
-    {
-        int map_x = (int)(check_x / TILE);
-        int map_y = (int)(check_y / TILE);
-        
-        // Adjust for looking left
-        if (looking_left)
-            map_x--;
-            
-        if (map_x < 0 || map_y < 0 || map_x >= game->width || map_y >= game->height)
-            break;
-            
-        if (game->map[map_y][map_x] == '1')
+        // Check bounds before drawing
+        if (x >= 0 && x < map->width * TILE && y >= 0 && y < map->height * TILE)
         {
-            hit.hit_x = check_x;
-            hit.hit_y = check_y;
-            hit.distance = sqrt((check_x - px) * (check_x - px) + (check_y - py) * (check_y - py));
-            hit.is_vertical = 1;
-            return hit;
+            int pixel_index = (y * map->img_size_line) + (x * (map->img_bpp / 8));
+            *(int *)(map->img_data + pixel_index) = color;
         }
         
-        check_x += x_step;
-        check_y += y_step;
+        if (x == x1 && y == y1)
+            break;
+            
+        int e2 = 2 * err;
+        if (e2 > -dy)
+        {
+            err -= dy;
+            x += sx;
+        }
+        if (e2 < dx)
+        {
+            err += dx;
+            y += sy;
+        }
     }
-    
-    hit.distance = 999999;
-    return hit;
 }
 
-// MODIFIED: Cast single ray using DDA - check horizontal first, then vertical
-t_hit cast_single_ray(t_map *game, double ray_angle)
+// Draw a single ray from player to wall hit point
+void draw_ray(t_map *map, t_ray ray)
 {
-    // Check horizontal intersections first
-    t_hit h_hit = check_horizontal_hit(game, ray_angle);
+    int start_x = (int)map->player.player_x;
+    int start_y = (int)map->player.player_y;
+    int end_x = (int)ray.wall_x;
+    int end_y = (int)ray.wall_y;
     
-    // Check vertical intersections
-    t_hit v_hit = check_vertical_hit(game, ray_angle);
+    // Use different colors for horizontal vs vertical walls
+    int ray_color = (ray.hit_side == 0) ? 0xFF0000 : 0x0000FF; // Red for vertical, Blue for horizontal
     
-    // Return the closest hit
-    if (h_hit.distance < v_hit.distance)
-        return h_hit;
-    else
-        return v_hit;
+    draw_line(map, start_x, start_y, end_x, end_y, ray_color);
 }
 
-// MODIFIED: Main function to cast all rays
-void cast_all_rays(t_map *game)
+// Cast and draw FOV rays using DDA algorithm
+void cast_fov_rays(t_map *map)
 {
-    double fov = 60.0;                          
-    int window_width = game->width * TILE;      
-    int num_rays = window_width;                
-   
-    double angle_step = fov / (double)num_rays; 
-    double start_angle = game->player.angle - (fov / 2.0); 
+    double fov = 60.0; // Field of view in degrees
+    double angle_step = fov / ray_num;
+    double start_angle = map->player.angle - (fov / 2.0);
     
-    for (int i = 0; i < num_rays; i++)
+    for (int i = 0; i < ray_num; i++)
     {
         double current_angle = start_angle + (i * angle_step);
         
-        // Normalize angle
-        while (current_angle < 0) 
-            current_angle += 360.0;
-        while (current_angle >= 360.0) 
-            current_angle -= 360.0;
+        // Normalize angle to 0-360 range
+        while (current_angle < 0)
+            current_angle += 360;
+        while (current_angle >= 360)
+            current_angle -= 360;
         
-        // Cast ray and get hit info
-        t_hit hit = cast_single_ray(game, current_angle);
+        // Cast single ray
+        t_ray ray = cast_single_ray(map, current_angle);
         
-        // Draw ray line for visualization (optional)
-        if (hit.distance < 999999)
-        {
-            double px = game->player.player_x + PLAYER_OFFSET + PLAYER_SIZE/2;
-            double py = game->player.player_y + PLAYER_OFFSET + PLAYER_SIZE/2;
-            
-            double dx = hit.hit_x - px;
-            double dy = hit.hit_y - py;
-            double steps = hit.distance;
-            
-            for (int j = 0; j < (int)steps; j++)
-            {
-                int draw_x = (int)(px + (dx * j / steps));
-                int draw_y = (int)(py + (dy * j / steps));
-                
-                // Different colors for horizontal vs vertical hits
-                int color = hit.is_vertical ? 0xFF0000 : 0x00FF00; // Red for vertical, Green for horizontal
-                draw_pixel(game, draw_x, draw_y, color);
-            }
-        }
+        // Draw the ray
+        draw_ray(map, ray);
         
-        // Here you can store hit.distance, hit.hit_x, hit.hit_y for 3D rendering
-        // For example: game->ray_distances[i] = hit.distance;
+        // Optional: Store ray data for later use
+        // map->rays[i] = ray;
     }
 }
 
-// MODIFIED: Sparse ray casting for better visualization
-void cast_fov_rays_sparse(t_map *game, int ray_spacing)
+// Alternative implementation with separate horizontal and vertical checks
+// (if you specifically want to check horizontal intersections first)
+t_ray cast_single_ray_separate_checks(t_map *map, double ray_angle)
 {
-    double fov = 60.0;                          
-    int window_width = game->width * TILE;      
-    int num_rays = window_width / ray_spacing;  
+    t_ray horizontal_ray = {0, 0, INFINITY, 1};
+    t_ray vertical_ray = {0, 0, INFINITY, 0};
     
-    double angle_step = fov / (double)num_rays;
-    double start_angle = game->player.angle - (fov / 2.0);
+    double ray_x = map->player.player_x;
+    double ray_y = map->player.player_y;
+    double ray_dir_x = cos(DEG_TO_RAD(ray_angle));
+    double ray_dir_y = sin(DEG_TO_RAD(ray_angle));
     
-    for (int i = 0; i < num_rays; i++)
+    // === Check Horizontal Intersections First ===
+    if (ray_dir_y != 0) // Avoid division by zero
     {
-        double current_angle = start_angle + (i * angle_step);
+        int step_y = (ray_dir_y > 0) ? 1 : -1;
+        int grid_y = (int)(ray_y / TILE) + (step_y > 0 ? 1 : 0);
         
-        // Normalize angle
-        while (current_angle < 0) 
-            current_angle += 360.0;
-        while (current_angle >= 360.0) 
-            current_angle -= 360.0;
-        
-        // Cast ray and get hit info
-        t_hit hit = cast_single_ray(game, current_angle);
-        
-        // Draw ray for visualization
-        if (hit.distance < 999999)
+        while (grid_y >= 0 && grid_y < map->height)
         {
-            double px = game->player.player_x + PLAYER_OFFSET + PLAYER_SIZE/2;
-            double py = game->player.player_y + PLAYER_OFFSET + PLAYER_SIZE/2;
+            double intersect_y = grid_y * TILE;
+            double intersect_x = ray_x + (intersect_y - ray_y) * ray_dir_x / ray_dir_y;
             
-            double dx = hit.hit_x - px;
-            double dy = hit.hit_y - py;
-            double steps = hit.distance;
+            int grid_x = (int)(intersect_x / TILE);
             
-            for (int j = 0; j < (int)steps; j++)
+            if (is_wall(map, grid_x, (step_y > 0) ? grid_y : grid_y - 1))
             {
-                int draw_x = (int)(px + (dx * j / steps));
-                int draw_y = (int)(py + (dy * j / steps));
-                
-                int color = hit.is_vertical ? 0xFF0000 : 0x00FF00;
-                draw_pixel(game, draw_x, draw_y, color);
+                horizontal_ray.wall_x = intersect_x;
+                horizontal_ray.wall_y = intersect_y;
+                horizontal_ray.distance = sqrt((intersect_x - ray_x) * (intersect_x - ray_x) + 
+                                             (intersect_y - ray_y) * (intersect_y - ray_y));
+                break;
             }
+            grid_y += step_y;
         }
     }
-}
-
-int handle_key_input(int keycode, t_map *map)
-{
-    int new_x, new_y;
     
-    if (keycode == KEY_ESC)
-        return (handle_close(map));
-    
-    if (keycode == 65361) // Left arrow
+    // === Check Vertical Intersections ===
+    if (ray_dir_x != 0) // Avoid division by zero
     {
-        map->player.angle -= 5.0;
-        if (map->player.angle < 0)
-            map->player.angle += 360;
+        int step_x = (ray_dir_x > 0) ? 1 : -1;
+        int grid_x = (int)(ray_x / TILE) + (step_x > 0 ? 1 : 0);
         
-        set_color(map);
-        draw_player(map);
-        cast_fov_rays_sparse(map, ray_num);
-        return (0);
-    }
-    else if (keycode == 65363) // Right arrow
-    {
-        map->player.angle += 5.0;
-        if (map->player.angle >= 360)
-            map->player.angle -= 360;
-        
-        set_color(map);
-        draw_player(map);
-        cast_fov_rays_sparse(map, ray_num);
-        return (0);
-    }
-    
-    new_x = map->player.player_x;
-    new_y = map->player.player_y;
-    
-    if (keycode == KEY_W)
-        new_y -= MOVE_SPEED;
-    else if (keycode == KEY_S)
-        new_y += MOVE_SPEED;
-    else if (keycode == KEY_A)
-        new_x -= MOVE_SPEED;
-    else if (keycode == KEY_D)
-        new_x += MOVE_SPEED;
-    else
-        return (0);
-    
-    if (is_valid_move(map, new_x, new_y))
-    {
-        set_color(map);
-        map->player.player_x = new_x;
-        map->player.player_y = new_y;
-        draw_player(map);
-        cast_fov_rays_sparse(map, ray_num);
+        while (grid_x >= 0 && grid_x < map->width)
+        {
+            double intersect_x = grid_x * TILE;
+            double intersect_y = ray_y + (intersect_x - ray_x) * ray_dir_y / ray_dir_x;
+            
+            int grid_y = (int)(intersect_y / TILE);
+            
+            if (is_wall(map, (step_x > 0) ? grid_x : grid_x - 1, grid_y))
+            {
+                vertical_ray.wall_x = intersect_x;
+                vertical_ray.wall_y = intersect_y;
+                vertical_ray.distance = sqrt((intersect_x - ray_x) * (intersect_x - ray_x) + 
+                                           (intersect_y - ray_y) * (intersect_y - ray_y));
+                break;
+            }
+            grid_x += step_x;
+        }
     }
     
-    return (0);
+    // Return the closest intersection
+    return (horizontal_ray.distance < vertical_ray.distance) ? horizontal_ray : vertical_ray;
 }
