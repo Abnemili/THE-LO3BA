@@ -6,12 +6,11 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 12:03:28 by abnemili          #+#    #+#             */
-/*   Updated: 2025/08/31 17:56:10 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/09/01 13:48:28 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../header/the_lo3ba.h"
-
 
 void init_image(t_map *map)
 {
@@ -24,6 +23,7 @@ void pixel_put_img(t_map *map, int x, int y, int color)
 {
     if (x < 0 || y < 0 || x >= map->width * TILE || y >= map->height * TILE)
         return;
+
     int index = y * map->img_size_line + x * (map->img_bpp / 8);
     *(unsigned int *)(map->img_data + index) = color;
 }
@@ -31,24 +31,33 @@ void pixel_put_img(t_map *map, int x, int y, int color)
 // Clear the entire image buffer
 void clear_image(t_map *map)
 {
-    int x, y;
-    for (y = 0; y < map->height * TILE; y++)
-        for (x = 0; x < map->width * TILE; x++)
+    int x = 0;
+    int y = 0;
+
+    while (y < map->height * TILE)
+    {
+        x = 0;
+        while (x < map->width * TILE)
+        {
             pixel_put_img(map, x, y, COLOR_FREE);
+            x++;
+        }
+        y++;
+    }
 }
 
 void draw_player(t_map *map)
 {
     int i = 0;
-    while (PLAYER_SIZE > i)
+    while (i < PLAYER_SIZE)
     {
         int j = 0;
-        while (PLAYER_SIZE > j)
+        while (j < PLAYER_SIZE)
         {
-            pixel_put_img(map, 
-                map->player.player_x + PLAYER_OFFSET + i,
-                map->player.player_y + PLAYER_OFFSET + j, 
-                PLAYER_COLOR);
+            pixel_put_img(map,
+                          map->player.player_x + PLAYER_OFFSET + i,
+                          map->player.player_y + PLAYER_OFFSET + j,
+                          PLAYER_COLOR);
             j++;
         }
         i++;
@@ -59,10 +68,11 @@ void draw_player(t_map *map)
 void draw_square(t_map *map, int x, int y, int color)
 {
     int dy = 0;
-    while (TILE > dy)
+
+    while (dy < TILE)
     {
         int dx = 0;  // FIXED: was "dy = 0" causing infinite loop
-        while (TILE > dx)
+        while (dx < TILE)
         {
             pixel_put_img(map, x * TILE + dx, y * TILE + dy, color);
             dx++;
@@ -74,19 +84,20 @@ void draw_square(t_map *map, int x, int y, int color)
 // Coloring the free space and the walls
 void set_color(t_map *map)
 {
-    int x, y, color;
-    
-    y = 0;
-    while (map->height > y)
+    int x = 0;
+    int y = 0;
+    int color;
+
+    while (y < map->height)
     {
         x = 0;
-        while (map->width > x)
+        while (x < map->width)
         {
-            if(map->map[y][x] == 48)  // '0'
+            if (map->map[y][x] == '0')
                 color = COLOR_FREE;
-            else if (map->map[y][x] == 49)  // '1'
+            else if (map->map[y][x] == '1')
                 color = COLOR_WALL;
-            else 
+            else
             {
                 x++;
                 continue;
@@ -115,13 +126,13 @@ void setup_rendering(t_map *map)
 // init the player first position in the map
 void init_player_position(t_map *map)
 {
-    int x, y;
+    int x = 0;
+    int y = 0;
 
-    y = 0;
-    while (map->height > y)
+    while (y < map->height)
     {
         x = 0;
-        while (map->width > x)
+        while (x < map->width)
         {
             if (map->map[y][x] == '0')
             {
@@ -144,6 +155,7 @@ void mlx_connection(t_map *map)
     map->mlx = mlx_init();
     if (!map->mlx)
         exit(1);
+
     map->win = mlx_new_window(map->mlx, map->width * TILE, map->height * TILE, "THE_LO3BA");
     if (!map->win)
     {
@@ -158,13 +170,13 @@ void load_game(t_map *map)
     mlx_connection(map);
     setup_rendering(map);
     init_player_position(map);
- 
+
     // Initial render
     render_scene(map);
 
     // Set up event hooks
     mlx_hook(map->win, 2, 1, handle_key_input, map);
     mlx_hook(map->win, 17, 0, handle_close, map);
-    
+
     mlx_loop(map->mlx);
 }
