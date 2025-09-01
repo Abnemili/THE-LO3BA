@@ -24,6 +24,11 @@
 # define PLAYER_SIZE   8   // Size of player square
 # define PLAYER_OFFSET 12  // Offset from tile corner
 
+
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600 
+#define WALL_HEIGHT_FACTOR 100
+
 /* Key codes */
 # define KEY_ESC 65307
 # define KEY_W   119
@@ -31,7 +36,7 @@
 # define KEY_A   97
 # define KEY_D   100
 
-# define ray_num 1
+# define ray_num 106 
 
 typedef struct s_ray
 {
