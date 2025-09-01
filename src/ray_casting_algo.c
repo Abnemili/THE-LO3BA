@@ -3,36 +3,47 @@
 // Cast a single ray using DDA algorithm
 void cast_single_ray(t_map *game, double ray_angle)
 {
-    double ray_x = game->player.player_x + PLAYER_OFFSET + PLAYER_SIZE/2;
+    // get the exact cordinate for the origine of the start for each ray 
+    double ray_x = game->player.player_x + PLAYER_OFFSET + PLAYER_SIZE/2; 
     double ray_y = game->player.player_y + PLAYER_OFFSET + PLAYER_SIZE/2;
     
+
+    // save these starting cordinate for later to draw these casted rays 
     double start_x = ray_x;
     double start_y = ray_y;
     
+    //setting the value of dy and dy in map codinate to know hum much r we gonna move h and v 
     double ray_dx = cos(DEG_TO_RAD(ray_angle));
     double ray_dy = sin(DEG_TO_RAD(ray_angle));
     
+    // CONVERT THE player position from pixel positon to grid map posiion indicated by tile fe
     int map_x = (int)(ray_x / TILE);
     int map_y = (int)(ray_y / TILE);
-    
+
+    // this indicate the closest horizental and vertical grit that first hit a wall 
     double delta_dist_x = fabs(1.0 / ray_dx);
     double delta_dist_y = fabs(1.0 / ray_dy);
+    
     
     double side_dist_x, side_dist_y;
     int step_x, step_y;
     
-    if (ray_dx < 0) {
+    if (ray_dx < 0)
+    {
         step_x = -1;
         side_dist_x = (ray_x / TILE - map_x) * delta_dist_x;
-    } else {
+    } else
+    {
         step_x = 1;
         side_dist_x = (map_x + 1.0 - ray_x / TILE) * delta_dist_x;
     }
     
-    if (ray_dy < 0) {
+    if (ray_dy < 0)
+    {
         step_y = -1;
         side_dist_y = (ray_y / TILE - map_y) * delta_dist_y;
-    } else {
+    } else
+    {
         step_y = 1;
         side_dist_y = (map_y + 1.0 - ray_y / TILE) * delta_dist_y;
     }
@@ -104,19 +115,20 @@ void cast_single_ray(t_map *game, double ray_angle)
             pixel_put_img(game, (int)wall_x, (int)wall_y, 0xFF0000); // Red dot
         }
     }
-}
+} 
 
 // Cast all FOV rays
 void cast_fov_rays(t_map *game)
 {
     double fov = 60.0;
-    double angle_step = fov / ray_num;
-    double start_angle = game->player.angle - (fov / 2.0);
-    
+    double angle_step = fov / ray_num; // getting the angle betwen each ray 
+    double start_angle = game->player.angle - (fov / 2.0); // set the starting angle for the left most ray the very first one 
+     
     for (int i = 0; i < ray_num; i++)
     {
-        double current_angle = start_angle + (i * angle_step);
+        double current_angle = start_angle + (i * angle_step); //getting the current angle where the casted ray should be 
         
+        // normlize the angle : prevent the angle wrap (angle over flow)
         while (current_angle < 0) current_angle += 360;
         while (current_angle >= 360) current_angle -= 360;
         
