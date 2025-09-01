@@ -7,7 +7,7 @@ void cast_single_ray(t_map *game, double ray_angle)
     double ray_x = game->player.player_x + PLAYER_OFFSET + PLAYER_SIZE/2; 
     double ray_y = game->player.player_y + PLAYER_OFFSET + PLAYER_SIZE/2;
     
-
+    
     // save these starting cordinate for later to draw these casted rays 
     double start_x = ray_x;
     double start_y = ray_y;
@@ -20,7 +20,7 @@ void cast_single_ray(t_map *game, double ray_angle)
     int map_x = (int)(ray_x / TILE);
     int map_y = (int)(ray_y / TILE);
 
-    // this indicate the closest horizental and vertical grit that first hit a wall 
+    // this indicate the closest horizental and vertical grid that first hit a wall 
     double delta_dist_x = fabs(1.0 / ray_dx);
     double delta_dist_y = fabs(1.0 / ray_dy);
     
@@ -70,7 +70,7 @@ void cast_single_ray(t_map *game, double ray_angle)
                 }
             }
             else
-                break;
+            break;
         }
         // Then check vertical intersection
         else
@@ -89,10 +89,9 @@ void cast_single_ray(t_map *game, double ray_angle)
                 }
             }
             else
-                break;
+            break;
         }
     }
-    
     // Draw ray to image buffer
     if (hit)
     {
@@ -115,7 +114,40 @@ void cast_single_ray(t_map *game, double ray_angle)
             pixel_put_img(game, (int)wall_x, (int)wall_y, 0xFF0000); // Red dot
         }
     }
-} 
+    if (hit)
+    {
+        printf("Ray angle: %.2f° - Hit at coordinates: (%.2f, %.2f)", 
+               ray_angle, wall_x, wall_y);
+        
+        // Calculate distance for debugging
+        double distance = sqrt((wall_x - start_x) * (wall_x - start_x) + (wall_y - start_y) * (wall_y - start_y));
+        printf("Distance: %.2f pixels\n", distance);
+        
+        // Draw ray to image buffer
+        double dx = wall_x - start_x;
+        double dy = wall_y - start_y;
+        double steps = fmax(fabs(dx), fabs(dy));
+        
+        if (steps > 0)
+        {
+            double x_inc = dx / steps;
+            double y_inc = dy / steps;
+            
+            for (int i = 0; i <= (int)steps; i += 2)
+            {
+                int x = (int)(start_x + i * x_inc);
+                int y = (int)(start_y + i * y_inc);
+                pixel_put_img(game, x, y, 0xFFFF00); // Yellow ray
+            }
+            
+            pixel_put_img(game, (int)wall_x, (int)wall_y, 0xFF0000); // Red dot
+        }
+    }
+    else
+    {
+        printf("Ray angle: %.2f° - No wall hit (ray went out of bounds)\n", ray_angle);
+    }
+}
 
 // Cast all FOV rays
 void cast_fov_rays(t_map *game)
