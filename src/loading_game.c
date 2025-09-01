@@ -6,11 +6,35 @@
 /*   By: abnemili <abnemili@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 12:03:28 by abnemili          #+#    #+#             */
-/*   Updated: 2025/09/01 13:48:28 by abnemili         ###   ########.fr       */
+/*   Updated: 2025/09/01 14:29:17 by abnemili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../header/the_lo3ba.h"
+
+
+void draw_grid(t_map *map)
+{
+    int x, y;
+    
+    // Draw vertical lines
+    for (x = 0; x <= map->width; x++)
+    {
+        for (y = 0; y < map->height * TILE; y++)
+        {
+            pixel_put_img(map, x * TILE, y, 0x404040); // Dark gray
+        }
+    }
+    
+    // Draw horizontal lines  
+    for (y = 0; y <= map->height; y++)
+    {
+        for (x = 0; x < map->width * TILE; x++)
+        {
+            pixel_put_img(map, x, y * TILE, 0x404040); // Dark gray
+        }
+    }
+}
 
 void init_image(t_map *map)
 {
@@ -113,6 +137,7 @@ void render_scene(t_map *map)
 {
     clear_image(map);
     set_color(map);
+    draw_grid(map);        // to see the grids
     draw_player(map);
     cast_fov_rays(map);  // Add rays to the scene
     mlx_put_image_to_window(map->mlx, map->win, map->img, 0, 0);

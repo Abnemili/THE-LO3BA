@@ -2,13 +2,13 @@
 # define THE_LO3BA_H
 
 # include <fcntl.h>
-# include "../get_line/get_next_line.h"
-# include <mlx.h>
 # include <stddef.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
 # include <math.h>
+# include <mlx.h>
+# include "../get_line/get_next_line.h"
 
 /* Game settings */
 # define TILE 64
@@ -31,7 +31,7 @@
 # define KEY_A   97
 # define KEY_D   100
 
-# define ray_num 320
+# define ray_num 1
 
 typedef struct s_ray
 {
