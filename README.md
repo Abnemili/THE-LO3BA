@@ -2,8 +2,6 @@
 
 A simple raycasting engine inspired by Wolfenstein 3D, built as part of the 42/1337 curriculum.
 
-**Made by:** abnemili & szaoual
-
 ## About
 
 This project is a 3D maze game using raycasting techniques. Navigate through textured walls in first-person view using basic movement and rotation controls.
